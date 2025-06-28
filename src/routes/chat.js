@@ -1,32 +1,52 @@
-// NEW FILE
+// routes/chat.js
+
 import { Router } from 'express';
 import OpenAI from 'openai';
 
 const router = Router();
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Initialize OpenAI with secret key from environment variables
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+// POST /api/chat → Generate AI response
 router.post('/', async (req, res) => {
   const { message = '' } = req.body;
-  if (!message.trim()) return res.status(400).json({ error: 'message_required' });
+
+  // Validate input
+  if (!message.trim()) {
+    return res.status(400).json({ error: 'message_required' });
+  }
 
   try {
-    const t0 = Date.now();
-    const ai = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const startTime = Date.now();
+
+    // Create chat completion using OpenAI
+    const aiResponse = await openai.chat.completions.create({
+      model: 'gpt-4o-mini', // or switch to 'gpt-4o' or 'gpt-3.5-turbo'
       temperature: 0.3,
       max_tokens: 120,
       messages: [
-        { role: 'system', content: 'You are CallMate AI, a friendly customer‑support agent. Keep responses concise and helpful.' },
-        { role: 'user', content: message }
+        {
+          role: 'system',
+          content:
+            'You are CallMate AI, a friendly customer support agent. Keep responses short, helpful, and professional.'
+        },
+        {
+          role: 'user',
+          content: message
+        }
       ]
     });
 
+    // Send back AI response with latency info
     res.json({
-      reply: ai.choices[0].message.content.trim(),
-      latency_ms: Date.now() - t0
+      reply: aiResponse.choices[0].message.content.trim(),
+      latency_ms: Date.now() - startTime
     });
   } catch (err) {
-    console.error(err);
+    console.error('[OpenAI Error]', err);
     res.status(500).json({ error: 'openai_failed' });
   }
 });
