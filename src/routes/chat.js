@@ -1,9 +1,4 @@
-// routes/chat.js
-// ─────────────────────────────────────────────────────────────
-// Chat endpoint for CallMate AI
-// POST /api/chat → { reply, latency_ms }
-// Requires: OPENAI_API_KEY (set in your .env / Render)
-// ─────────────────────────────────────────────────────────────
+// src/routes/chat.js
 
 import { Router } from 'express';
 import OpenAI from 'openai';
@@ -12,14 +7,14 @@ const router = Router();
 
 // Initialize OpenAI client
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
-// POST /api/chat
+// POST /api/chat → Generate chat response
 router.post('/', async (req, res) => {
   const { message = '' } = req.body ?? {};
 
-  // Validate input
+  // Basic validation
   if (!message.trim()) {
     return res.status(400).json({ error: 'message_required' });
   }
@@ -28,34 +23,33 @@ router.post('/', async (req, res) => {
     const start = Date.now();
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo', // safer option with broader access
+      model: 'gpt-3.5-turbo', // switched from gpt-4o-mini
       temperature: 0.3,
-      max_tokens: 120,
+      max_tokens: 150,
       messages: [
         {
           role: 'system',
-          content: 'You are CallMate AI, a helpful, concise and empathetic customer service assistant.'
+          content:
+            'You are CallMate AI, a helpful, polite, and professional customer service assistant. Answer concisely and empathetically.',
         },
         {
           role: 'user',
-          content: message
-        }
-      ]
+          content: message,
+        },
+      ],
     });
 
-    const reply = completion.choices?.[0]?.message?.content?.trim() || 'Sorry, I had trouble formulating a response.';
+    const reply = completion.choices[0]?.message?.content?.trim() || 'Sorry, I had trouble responding.';
 
     res.json({
       reply,
-      latency_ms: Date.now() - start
+      latency_ms: Date.now() - start,
     });
-
   } catch (err) {
-    console.error('[OpenAI] Chat completion failed:', err?.response?.data || err.message || err);
-
+    console.error('[OpenAI Chat Error]', err);
     res.status(500).json({
       error: 'openai_failed',
-      message: err?.response?.data?.error?.message || err.message || 'Something went wrong while communicating with OpenAI.'
+      message: err.message || 'OpenAI API failed',
     });
   }
 });
