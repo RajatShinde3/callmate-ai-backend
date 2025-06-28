@@ -13,6 +13,7 @@ import healthRoutes from './routes/health.js';
 import callRoutes from './routes/calls.js';
 import aiRoutes from './routes/ai.js';
 import suggestRoutes from './routes/suggest.js';
+import chatRoutes from './routes/chat.js';
 
 // App setup
 const app = express();
@@ -57,6 +58,7 @@ app.use('/api/health', healthRoutes);
 app.use('/api/calls', callRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/suggest', suggestRoutes);
+app.use('/api/chat', chatRoutes); 
 
 // Root Route
 app.get('/', (req, res) => {
