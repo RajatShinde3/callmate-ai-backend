@@ -70,7 +70,8 @@ app.get('/', (req, res) => {
       health: '/api/health',
       calls: '/api/calls',
       ai: '/api/ai',
-      suggest: '/api/suggest'
+      suggest: '/api/suggest',
+      chat: '/api/chat'
     }
   });
 });
