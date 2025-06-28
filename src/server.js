@@ -29,7 +29,6 @@ app.use(rateLimit({
   message: 'Too many requests from this IP, please try again later.'
 }));
 
-// Recommended fallback config
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
   : ['http://localhost:5173'];
@@ -44,6 +43,13 @@ app.use(cors({
   },
   credentials: true
 }));
+
+// ✅ MUST come before routes
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(morgan('combined'));
+
 // ─────────────────────────────────────────────────────────────
 // API Routes
 // ─────────────────────────────────────────────────────────────
