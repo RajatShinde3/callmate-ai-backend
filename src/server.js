@@ -29,19 +29,21 @@ app.use(rateLimit({
   message: 'Too many requests from this IP, please try again later.'
 }));
 
+// Recommended fallback config
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
   : ['http://localhost:5173'];
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
-
-app.use(morgan('combined'));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
-
 // ─────────────────────────────────────────────────────────────
 // API Routes
 // ─────────────────────────────────────────────────────────────
